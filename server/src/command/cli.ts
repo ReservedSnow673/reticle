@@ -549,7 +549,9 @@ function handleOpen(requestedPort: number, url: string | undefined, navigate = f
       // Say whether a SESSION appeared, not merely that a launcher was invoked. `{"opened": url}`
       // was printed unconditionally, so a run where nothing ever opened looked identical to a run
       // where it did — reported from the field as twenty minutes lost to a phantom port problem.
-      const waited = await waitForNewSession(port, sessions.length);
+      const waited = await waitForNewSession(sessions.length, () =>
+        fetchStatus(port).then(summarizeStatus),
+      );
       log('reticle_open', {
         port,
         ...(port === requestedPort ? {} : { requestedPort }),

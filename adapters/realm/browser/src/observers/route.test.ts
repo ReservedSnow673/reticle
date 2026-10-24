@@ -40,6 +40,16 @@ describe('installRoute', () => {
     expect(String(events.at(-1)?.data['pathname'])).toContain('/invoices/42');
   });
 
+  it('removes a known secret from the document title it sends', () => {
+    document.title = 'Invoice ghp_abcdefghijklmnopqrst';
+    const { emit, events } = collect();
+    teardown = installRoute(emit);
+
+    history.pushState({}, '', '/invoices/42');
+
+    expect(JSON.stringify(events[0]?.data)).not.toContain('ghp_abcdefghijklmnopqrst');
+  });
+
   it('emits ROUTE_CHANGE on pushState to a new url', () => {
     const { emit, events } = collect();
     teardown = installRoute(emit);

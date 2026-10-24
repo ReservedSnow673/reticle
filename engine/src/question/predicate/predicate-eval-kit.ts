@@ -216,6 +216,15 @@ export interface FieldReading {
 /** A JSON object or a JSON array. Both can be walked by a field path. */
 export type JsonFields = Record<string, unknown> | unknown[];
 
+/** An own field. An array is indexed only by a canonical index, which is the only key JSON gives it. */
+function ownField(actual: JsonFields, key: string): unknown {
+  if (Array.isArray(actual)) {
+    const index = Number(key);
+    return String(index) === key ? actual[index] : undefined;
+  }
+  return actual[key];
+}
+
 /**
  * Read one pattern key out of a payload.
  *
@@ -227,7 +236,7 @@ export type JsonFields = Record<string, unknown> | unknown[];
  * once.
  */
 export function readField(actual: JsonFields, key: string): FieldReading {
-  if (Object.hasOwn(actual, key)) return { found: true, value: actual[key] };
+  if (Object.hasOwn(actual, key)) return { found: true, value: ownField(actual, key) };
   if (!key.includes('.') && !key.includes('['))
     return { found: false, value: undefined, availableKeys: Object.keys(actual) };
   const selection = selectPath(actual, key);
@@ -319,7 +328,7 @@ export function parseJsonObject(body: string): JsonFields | undefined {
  * and reporting that as "missing" would blame the server for the observer's own redaction.
  */
 export function redactedOnPath(actual: JsonFields, key: string): boolean {
-  if (Object.hasOwn(actual, key)) return REDACTED_VALUE === actual[key];
+  if (Object.hasOwn(actual, key)) return REDACTED_VALUE === ownField(actual, key);
   const segments = key.split('.');
   for (let i = 1; i <= segments.length; i += 1) {
     const prefix = selectPath(actual, segments.slice(0, i).join('.'));

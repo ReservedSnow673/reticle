@@ -45,9 +45,12 @@ describe('installRoute', () => {
     const { emit, events } = collect();
     teardown = installRoute(emit);
 
-    history.pushState({}, '', '/invoices/42');
+    // A same-href push is dropped, so this cannot reuse the path the title test already opened.
+    history.pushState({}, '', '/invoices/secret');
 
-    expect(JSON.stringify(events[0]?.data)).not.toContain('ghp_abcdefghijklmnopqrst');
+    const sent = JSON.stringify(events.map((event) => event.data));
+    expect(sent).not.toContain('ghp_abcdefghijklmnopqrst');
+    expect(events[0]?.data['title']).toBe('Invoice [REDACTED]');
   });
 
   it('emits ROUTE_CHANGE on pushState to a new url', () => {

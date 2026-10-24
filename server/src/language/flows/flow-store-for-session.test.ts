@@ -33,7 +33,7 @@ describe('a lease root lists its own worktree', () => {
         flows: new FlowStore(fs, DAEMON, { now: () => 1 }),
         now: () => 1,
         artifactRootFor: () => ({ root: OTHER, reason: ArtifactRootReason.MATCHED_PROJECT }),
-      } as ToolDeps,
+      } as unknown as ToolDeps,
       {
         projectId: asProjectId('acme-web-9f3c1d'),
         origin: 'http://localhost:5173',
